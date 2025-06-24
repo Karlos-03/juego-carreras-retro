@@ -1,0 +1,147 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #222;
+    font-family: 'Arial', sans-serif; /* Usamos Arial como fallback */
+    color: #eee;
+    overflow: hidden; /* Evita barras de desplazamiento */
+    padding: 10px; /* Añadimos un poco de padding al body para que no se pegue a los bordes */
+    box-sizing: border-box; /* Asegura que padding no aumente el tamaño total */
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #333;
+    padding: 2vw; /* Usamos unidades relativas para el padding */
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    border: 2px solid #555;
+
+    /* Nuevos estilos para responsividad */
+    width: 90vw; /* El contenedor ocupará el 90% del ancho del viewport */
+    max-width: 400px; /* Pero no será más ancho que 400px (para pantallas grandes) */
+    height: 90vh; /* El contenedor ocupará el 90% de la altura del viewport */
+    max-height: 700px; /* Pero no será más alto que 700px */
+    justify-content: space-between; /* Distribuye el espacio entre canvas e info/controles */
+}
+
+canvas {
+    background-color: #000;
+    border: 2px solid #666;
+    display: block;
+    /* Ajustes para el canvas */
+    width: 100%; /* El canvas ocupa el 100% del ancho disponible en su contenedor */
+    /* Mantenemos una relación de aspecto 3:5 (ancho:alto) */
+    aspect-ratio: 3 / 5; /* CSS moderno para mantener el aspecto */
+    flex-shrink: 0; /* Evita que el canvas se encoja más de lo necesario */
+    max-height: 60%; /* Ocupa como máximo el 60% de la altura del contenedor para dejar espacio a los controles */
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 1.5vh; /* Margen superior relativo */
+    margin-bottom: 1.5vh; /* Margen inferior relativo */
+    font-size: clamp(1em, 2.5vw, 1.5em); /* Tamaño de fuente adaptable (mín, ideal, máx) */
+    color: #ff0000;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1vw; /* Padding relativo */
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    flex-shrink: 0; /* Evita que los controles se encojan en exceso */
+    width: 80%; /* Los controles ocupan el 80% del ancho de su contenedor */
+    max-width: 250px; /* Pero no serán demasiado anchos */
+    margin-top: auto; /* Empuja los controles hacia abajo si hay espacio extra */
+    box-sizing: border-box;
+}
+
+.control-button {
+    width: clamp(50px, 12vw, 70px); /* Tamaño adaptable (mín, ideal, máx) */
+    height: clamp(50px, 12vw, 70px); /* Mismo tamaño para ancho y alto */
+    background-color: #666;
+    border: 2px solid #999;
+    border-radius: 50%;
+    margin: 0.5vw; /* Margen relativo */
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(1.5em, 5vw, 2.5em); /* Tamaño de flecha adaptable */
+    color: #eee;
+    -webkit-user-select: none; /* Agrega esta línea para compatibilidad con Safari */
+    user-select: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.control-button:active {
+    background-color: #444;
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para simular las flechas */
+.arrow-up::before {
+    content: '▲';
+}
+.arrow-down::before {
+    content: '▼';
+}
+.arrow-left::before {
+    content: '◀';
+}
+.arrow-right::before {
+    content: '▶';
+}
+
+.horizontal-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -1.5vw; /* Ajuste de margen relativo */
+    margin-bottom: 0.5vw; /* Ajuste de margen relativo */
+}
+
+/* Ajustes específicos para la disposición de la cruceta */
+.horizontal-controls #downButton {
+    order: 2;
+}
+
+.horizontal-controls #leftButton {
+    order: 1;
+}
+
+.horizontal-controls #rightButton {
+    order: 3;
+}
+
+/* Ajustar el margen del botón 'arriba' */
+#upButton {
+    margin-bottom: 1.5vw; /* Espacio relativo */
+}
+
+/* Clase para ocultar texto visualmente pero mantenerlo accesible */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
