@@ -17,7 +17,7 @@ const playerCarWidth = 40;
 const playerCarHeight = 60;
 let playerCarX = (gameWidth / 2) - (playerCarWidth / 2);
 const playerCarY = gameHeight - playerCarHeight - 20;
-const playerMoveSpeed = 5;
+const playerMoveSpeed = 10; // Aumentado para un movimiento más rápido
 
 // Variables para el juego
 let score = 0;
@@ -37,8 +37,7 @@ const scoreDisplay = document.getElementById('score');
 const levelDisplay = document.getElementById('level');
 const leftButton = document.getElementById('leftButton');
 const rightButton = document.getElementById('rightButton');
-const upButton = document.getElementById('upButton');
-const downButton = document.getElementById('downButton'); // Referencia al botón 'abajo'
+// Eliminadas referencias a upButton y downButton
 
 // ** 3. Función para dibujar la carretera **
 function drawRoad() {
@@ -125,7 +124,7 @@ function render() {
     ctx.clearRect(0, 0, gameWidth, gameHeight);
     drawRoad();
     drawPlayerCar();
-    enemyCars.forEach(drawEnemyCar); // Dibuja cada auto en el array
+    enemyCars.forEach(drawEnemyCar);
     updateUI();
 }
 
@@ -164,13 +163,7 @@ function gameLoop(currentTime) {
 function setupButtonListeners() {
     leftButton.addEventListener('click', movePlayerLeft);
     rightButton.addEventListener('click', movePlayerRight);
-
-    upButton.addEventListener('click', () => {
-        console.log("Botón Arriba presionado (sin funcionalidad de juego definida aún).");
-    });
-    downButton.addEventListener('click', () => {
-        console.log("Botón Abajo presionado (sin funcionalidad de juego definida aún).");
-    });
+    // Eliminados listeners para upButton y downButton
 }
 
 // ** 10. Función de inicialización del juego **

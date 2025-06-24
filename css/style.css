@@ -53,7 +53,7 @@ canvas {
 
 .controls {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Mantener para posible futura expansión, aunque ahora solo tiene una fila */
     align-items: center;
     padding: 2vw;
     background-color: #2a2a2a;
@@ -64,7 +64,7 @@ canvas {
     max-width: 250px;
     margin-top: auto;
     box-sizing: border-box;
-    gap: 1.5vw;
+    /* Eliminamos 'gap' aquí ya que el botón de arriba ya no existe */
     margin-bottom: 1vh; /* Añadido para dar un pequeño margen inferior */
 }
 
@@ -92,6 +92,7 @@ canvas {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* Estilos para simular las flechas */
 .arrow-up::before {
     content: '▲';
 }
@@ -109,22 +110,24 @@ canvas {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 1.5vw;
-    margin: 0;
+    gap: 1.5vw; /* Espacio horizontal entre los botones dentro de esta fila */
+    margin: 0; /* Aseguramos que no haya márgenes externos no deseados */
 }
 
+/* Ajustes específicos para la disposición de la cruceta - estas reglas ya no son tan críticas al eliminar el botón de abajo */
 .horizontal-controls #downButton {
-    order: 2;
+    /* order: 2; Removido */
 }
 
 .horizontal-controls #leftButton {
-    order: 1;
+    /* order: 1; Removido */
 }
 
 .horizontal-controls #rightButton {
-    order: 3;
+    /* order: 3; Removido */
 }
 
+/* Clase para ocultar texto visualmente pero mantenerlo accesible (para los lectores de pantalla) */
 .visually-hidden {
     position: absolute;
     width: 1px;
