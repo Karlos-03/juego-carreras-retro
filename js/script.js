@@ -1,63 +1,65 @@
 // ** 1. Configuración inicial del Canvas y Contexto **
 const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d'); // Obtenemos el contexto 2D para dibujar
+const ctx = canvas.getContext('2d');
 
 // ** 2. Definición de variables del juego **
 const gameWidth = canvas.width;
 const gameHeight = canvas.height;
 
 // Propiedades de la carretera
-const roadLaneWidth = gameWidth / 3; // Dividimos el ancho total en 3 carriles
-const laneMarkingsWidth = 5; // Ancho de las líneas discontinuas de la carretera
-const laneMarkingsHeight = 20; // Altura de los segmentos de las líneas
-const laneMarkingsGap = 30; // Espacio entre los segmentos de las líneas
+const roadLaneWidth = gameWidth / 3;
+const laneMarkingsWidth = 5;
+const laneMarkingsHeight = 20;
+const laneMarkingsGap = 30;
 
 // Propiedades del jugador (auto)
 const playerCarWidth = 40;
 const playerCarHeight = 60;
-let playerCarX = (gameWidth / 2) - (playerCarWidth / 2); // Posición inicial X (centrado en el carril central)
-const playerCarY = gameHeight - playerCarHeight - 20; // Posición inicial Y (cerca del borde inferior)
-
-// Velocidad de movimiento gradual del auto (esto es clave para tu requisito)
-const playerMoveSpeed = 5; // Cantidad de píxeles que se mueve por cada 'clic' o paso gradual
+let playerCarX = (gameWidth / 2) - (playerCarWidth / 2);
+const playerCarY = gameHeight - playerCarHeight - 20;
+const playerMoveSpeed = 5;
 
 // Variables para el juego
 let score = 0;
 let level = 1;
 let gameOver = false;
+let gameSpeed = 3; // Velocidad inicial de los autos enemigos y la carretera
+
+// Propiedades de los autos enemigos
+const enemyCarWidth = 40;
+const enemyCarHeight = 60;
+let enemyCars = []; // Array para almacenar todos los autos enemigos
+let lastEnemySpawnTime = 0;
+const enemySpawnInterval = 1500; // Tiempo en milisegundos entre la aparición de autos (1.5 segundos)
 
 // Referencias a los elementos de la UI
 const scoreDisplay = document.getElementById('score');
 const levelDisplay = document.getElementById('level');
 const leftButton = document.getElementById('leftButton');
 const rightButton = document.getElementById('rightButton');
-const upButton = document.getElementById('upButton'); // Por si se usa para acelerar más adelante
+const upButton = document.getElementById('upButton');
+const downButton = document.getElementById('downButton'); // Referencia al botón 'abajo'
 
 // ** 3. Función para dibujar la carretera **
 function drawRoad() {
-    // Fondo de la carretera (asfalto)
-    ctx.fillStyle = '#444'; // Gris oscuro para el asfalto
+    ctx.fillStyle = '#444';
     ctx.fillRect(0, 0, gameWidth, gameHeight);
 
-    // Líneas de los carriles (blancas discontinuas)
-    ctx.fillStyle = '#fff'; // Blanco para las líneas
-    ctx.strokeStyle = '#fff'; // Color del borde (opcional, pero buena práctica)
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#fff';
     ctx.lineWidth = laneMarkingsWidth;
 
     // Dibujar las líneas centrales discontinuas
     for (let y = 0; y < gameHeight; y += laneMarkingsHeight + laneMarkingsGap) {
-        // Línea del carril izquierdo
         ctx.fillRect(roadLaneWidth - (laneMarkingsWidth / 2), y, laneMarkingsWidth, laneMarkingsHeight);
-        // Línea del carril derecho
         ctx.fillRect((roadLaneWidth * 2) - (laneMarkingsWidth / 2), y, laneMarkingsWidth, laneMarkingsHeight);
     }
 }
 
 // ** 4. Función para dibujar el auto del jugador **
 function drawPlayerCar() {
-    ctx.fillStyle = 'blue'; // Color del auto del jugador
+    ctx.fillStyle = 'blue';
     ctx.fillRect(playerCarX, playerCarY, playerCarWidth, playerCarHeight);
-    // Opcional: dibujar un contorno para que se vea más como un auto
     ctx.strokeStyle = 'darkblue';
     ctx.lineWidth = 2;
     ctx.strokeRect(playerCarX, playerCarY, playerCarWidth, playerCarHeight);
@@ -69,58 +71,118 @@ function updateUI() {
     levelDisplay.textContent = level;
 }
 
+// Funciones para autos enemigos
+function drawEnemyCar(car) {
+    ctx.fillStyle = car.color;
+    ctx.fillRect(car.x, car.y, car.width, car.height);
+    ctx.strokeStyle = 'darkred';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(car.x, car.y, car.width, car.height);
+}
+
+function spawnEnemyCar() {
+    const colors = ['red', 'green', 'yellow', 'purple', 'orange'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+    const randomLane = Math.floor(Math.random() * 3);
+    let enemyX;
+
+    if (randomLane === 0) {
+        enemyX = (roadLaneWidth / 2) - (enemyCarWidth / 2);
+    } else if (randomLane === 1) {
+        enemyX = roadLaneWidth + (roadLaneWidth / 2) - (enemyCarWidth / 2);
+    } else {
+        enemyX = (roadLaneWidth * 2) + (roadLaneWidth / 2) - (enemyCarWidth / 2);
+    }
+
+    enemyCars.push({
+        x: enemyX,
+        y: -enemyCarHeight,
+        width: enemyCarWidth,
+        height: enemyCarHeight,
+        color: randomColor
+    });
+}
+
+function moveEnemyCars() {
+    for (let i = 0; i < enemyCars.length; i++) {
+        enemyCars[i].y += gameSpeed;
+
+        if (enemyCars[i].y > gameHeight) {
+            enemyCars.splice(i, 1);
+            score += 10;
+            if (score % 100 === 0 && score > 0) {
+                level++;
+                gameSpeed += 0.5;
+            }
+            i--;
+        }
+    }
+}
+
 // ** 6. Función principal de dibujo (render) **
 function render() {
-    ctx.clearRect(0, 0, gameWidth, gameHeight); // Limpia el canvas en cada fotograma
+    ctx.clearRect(0, 0, gameWidth, gameHeight);
     drawRoad();
     drawPlayerCar();
-    updateUI(); // Actualiza la puntuación y el nivel
+    enemyCars.forEach(drawEnemyCar); // Dibuja cada auto en el array
+    updateUI();
 }
 
-// ** 7. Función de inicialización del juego **
-function initGame() {
-    // Aquí pondremos losEventListeners para los botones en el siguiente paso
-    render(); // Dibuja el estado inicial del juego
-}
-
-// Inicia el juego cuando la página se carga
-document.addEventListener('DOMContentLoaded', initGame);
-
-// ** 8. Funciones de movimiento (para el siguiente paso) **
-// Estas funciones se llamarán cuando se presionen los botones
+// ** 7. Funciones de movimiento del jugador **
 function movePlayerLeft() {
-    // Limita el movimiento para que no se salga del carril más a la izquierda
     playerCarX = Math.max(playerCarX - playerMoveSpeed, 0);
-    render(); // Vuelve a dibujar el juego después del movimiento
+    // No llamamos a render aquí, ya que el gameloop se encargará de ello
 }
 
 function movePlayerRight() {
-    // Limita el movimiento para que no se salga del carril más a la derecha
     playerCarX = Math.min(playerCarX + playerMoveSpeed, gameWidth - playerCarWidth);
-    render(); // Vuelve a dibujar el juego después del movimiento
+    // No llamamos a render aquí, ya que el gameloop se encargará de ello
 }
-// ** NUEVA SECCIÓN: 8. Manejo de eventos de los botones **
-// ----------------------------------------------------
+
+// ** 8. Bucle principal del juego (Game Loop) **
+let animationFrameId;
+
+function gameLoop(currentTime) {
+    if (gameOver) {
+        cancelAnimationFrame(animationFrameId);
+        return;
+    }
+
+    if (currentTime - lastEnemySpawnTime > enemySpawnInterval) {
+        spawnEnemyCar();
+        lastEnemySpawnTime = currentTime;
+    }
+
+    moveEnemyCars();
+    render();
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+// ** 9. Manejo de eventos de los botones **
 function setupButtonListeners() {
     leftButton.addEventListener('click', movePlayerLeft);
     rightButton.addEventListener('click', movePlayerRight);
 
-    // Los botones 'arriba' y 'abajo' no tienen funcionalidad aún en este juego,
-    // pero los incluimos para completar la cruceta si decides darles uso.
     upButton.addEventListener('click', () => {
         console.log("Botón Arriba presionado (sin funcionalidad de juego definida aún).");
-        // Aquí podrías añadir una función para acelerar el desplazamiento de la carretera, por ejemplo.
     });
     downButton.addEventListener('click', () => {
         console.log("Botón Abajo presionado (sin funcionalidad de juego definida aún).");
-        // Aquí podrías añadir una función para frenar, por ejemplo.
     });
 }
 
-// ** 9. Función de inicialización del juego (modificada) **
+// ** 10. Función de inicialización del juego **
 function initGame() {
-    setupButtonListeners(); // Configura los listeners de los botones al iniciar el juego
-    render(); // Dibuja el estado inicial del juego
+    setupButtonListeners();
+    score = 0;
+    level = 1;
+    gameSpeed = 3;
+    enemyCars = [];
+    gameOver = false;
+
+    animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 // Inicia el juego cuando la página se carga
