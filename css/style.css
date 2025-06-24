@@ -58,29 +58,29 @@ canvas {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 1vw; /* Padding relativo */
+    padding: 2vw; /* Mantener padding relativo */
     background-color: #2a2a2a;
     border-radius: 10px;
     box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-    flex-shrink: 0; /* Evita que los controles se encojan en exceso */
-    width: 80%; /* Los controles ocupan el 80% del ancho de su contenedor */
-    max-width: 250px; /* Pero no serán demasiado anchos */
-    margin-top: auto; /* Empuja los controles hacia abajo si hay espacio extra */
+    flex-shrink: 0;
+    width: 80%;
+    max-width: 250px;
+    margin-top: auto;
     box-sizing: border-box;
+    gap: 1.5vw; /* Espacio vertical entre el botón 'arriba' y el grupo horizontal */
 }
 
 .control-button {
-    width: clamp(50px, 12vw, 70px); /* Tamaño adaptable (mín, ideal, máx) */
-    height: clamp(50px, 12vw, 70px); /* Mismo tamaño para ancho y alto */
+    width: clamp(50px, 12vw, 70px);
+    height: clamp(50px, 12vw, 70px);
     background-color: #666;
     border: 2px solid #999;
     border-radius: 50%;
-    margin: 0.5vw; /* Margen relativo */
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: clamp(1.5em, 5vw, 2.5em); /* Tamaño de flecha adaptable */
+    font-size: clamp(1.5em, 5vw, 2.5em);
     color: #eee;
     -webkit-user-select: none; /* Agrega esta línea para compatibilidad con Safari */
     user-select: none;
@@ -112,29 +112,24 @@ canvas {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: -1.5vw; /* Ajuste de margen relativo */
-    margin-bottom: 0.5vw; /* Ajuste de margen relativo */
+    gap: 1.5vw; /* Espacio horizontal entre los botones dentro de esta fila */
+    margin: 0; /* Aseguramos que no haya márgenes externos no deseados */
 }
 
 /* Ajustes específicos para la disposición de la cruceta */
 .horizontal-controls #downButton {
-    order: 2;
+    order: 2; /* Botón de abajo en el centro de la fila horizontal */
 }
 
 .horizontal-controls #leftButton {
-    order: 1;
+    order: 1; /* Botón izquierdo primero */
 }
 
 .horizontal-controls #rightButton {
-    order: 3;
+    order: 3; /* Botón derecho al final */
 }
 
-/* Ajustar el margen del botón 'arriba' */
-#upButton {
-    margin-bottom: 1.5vw; /* Espacio relativo */
-}
-
-/* Clase para ocultar texto visualmente pero mantenerlo accesible */
+/* Clase para ocultar texto visualmente pero mantenerlo accesible (para los lectores de pantalla) */
 .visually-hidden {
     position: absolute;
     width: 1px;
