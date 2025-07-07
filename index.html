@@ -1,56 +1,470 @@
-¡Excelente pregunta! Ahora que tu repositorio está creado y ya has hecho tu primer commit, el proceso para hacer nuevos cambios y actualizarlos en GitHub es un ciclo repetitivo de tres pasos principales
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Carreras 3D</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-ModificarCrear archivos Realiza los cambios que necesites en tus archivos de código (por ejemplo, actualiza game.js, modifica index.html, añade nuevos archivos, etc.).
-Preparar los cambios para un commit (git add) Una vez que estés satisfecho con tus modificaciones, le indicas a Git qué cambios quieres incluir en tu próximo punto de guardado.
-Realizar el commit (git commit) Creas un nuevo punto de guardado en el historial de tu proyecto, con un mensaje que describe lo que cambiaste.
-Subir los cambios a GitHub (git push) Envías tus nuevos commits desde tu repositorio local al repositorio remoto en GitHub.
-Aquí te explico los comandos
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            font-family: 'Press Start 2P', cursive;
+        }
 
-Ciclo de trabajo para nuevos commits y actualizaciones en GitHub
-Cuando quieras hacer nuevos cambios y subirlos, seguirás estos pasos en tu terminal (en la carpeta de tu proyecto)
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        
+        #uiContainer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px #000000;
+            z-index: 10;
+        }
 
-Paso 1 Realiza tus cambios en los archivos.
+        .modal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
 
-Por ejemplo, abres jsgame.js y haces mejoras, o creas un nuevo archivo CSS.
-Paso 2 Prepara tus cambios (git add).
-Después de modificar o crear archivos, necesitas decirle a Git que los prepare para el próximo commit.
+        .modal-content {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 15px;
+            border: 5px solid #fff;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            max-width: 90%;
+            width: auto;
+            min-width: 280px;
+        }
 
-Para añadir todos los cambios (recomendado para empezar)
+        #modalTitle { font-size: 2em; margin-bottom: 10px; color: white; }
+        #finalScore { font-size: 1.5em; margin-bottom: 20px; color: #ffd700; }
+        
+        .modal-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
 
-Bash
+        .modal-btn {
+            padding: 15px 25px;
+            font-size: 1em;
+            font-family: 'Press Start 2P', cursive;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        .modal-btn:hover { transform: scale(1.05); }
+        #restartButton { color: #1a1a1a; background-color: #4CAF50; }
+        
+      
+        #mobileControls {
+            display: none; 
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 20;
+        }
+        .control-cluster { display: flex; gap: 15px; }
+        .control-btn {
+            width: 60px; height: 60px; background-color: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.5); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; color: white; -webkit-user-select: none; user-select: none;
+        }
+        #motionButton {
+            padding: 10px 15px; font-size: 0.7em; background-color: #f0ad4e;
+            color: #1a1a1a; border-radius: 8px; border: none;
+        }
 
-git add .
-El punto (.) indica que se añadan todos los archivos nuevos, modificados o eliminados en el directorio actual y sus subdirectorios.
+        /* Media Queries para responsividad */
+        @media (max-width: 768px) {
+            #uiContainer { font-size: 1.2em; }
+            #modalTitle { font-size: 1.5em; }
+            #finalScore { font-size: 1.2em; }
+        }
 
-Para añadir archivos específicos
+        @media (max-width: 480px) {
+            #uiContainer { font-size: 1em; top: 10px; left: 10px; }
+            .control-btn { width: 50px; height: 50px; font-size: 24px; }
+            #motionButton { font-size: 0.6em; }
+        }
+    </style>
+</head>
+<body>
+    <div id="uiContainer">
+        <div>Puntos: <span id="score">0</span></div>
+        <div>Nivel: <span id="level">1</span></div>
+    </div>
+    <div id="gameContainer"></div>
 
-Bash
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">¡JUEGO TERMINADO!</h2>
+            <p id="finalScore">Puntuación: 0</p>
+            <div class="modal-buttons">
+                <button id="restartButton" class="modal-btn">REINICIAR</button>
+            </div>
+        </div>
+    </div>
 
-git add nombre_del_archivo.js
-git add carpetaotro_archivo.html
-Esto es útil si solo quieres incluir ciertos cambios en un commit.
+    <div id="mobileControls">
+        <div class="control-cluster">
+            <div id="btnLeft" class="control-btn">◀</div>
+            <div id="btnRight" class="control-btn">▶</div>
+        </div>
+        <button id="motionButton">Activar Control por Movimiento</button>
+        <div class="control-cluster">
+            <div id="btnUp" class="control-btn">▲</div>
+            <div id="btnDown" class="control-btn">▼</div>
+        </div>
+    </div>
 
-Paso 3 Realiza un nuevo commit (git commit).
-Una vez que los cambios están preparados, los guardas en el historial de tu repositorio con un mensaje descriptivo.
 
-Bash
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 
-git commit -m Mensaje descriptivo de tus cambios aquí
-git commit El comando para crear un commit.
--m Mensaje... El flag -m te permite escribir un mensaje corto directamente en la línea de comandos. Es crucial que este mensaje describa claramente qué hiciste en este commit (por ejemplo, Añadir control táctil, Corregir bug de colisión, Implementar puntuación más alta local).
-Paso 4 Sube tus cambios a GitHub (git push).
-Este comando envía tus nuevos commits desde tu repositorio local a tu repositorio remoto en GitHub.
+        const gameContainer = document.getElementById('gameContainer');
+        const scoreEl = document.getElementById('score');
+        const levelEl = document.getElementById('level');
+        const modal = document.getElementById('gameOverModal');
+        const finalScoreEl = document.getElementById('finalScore');
+        const restartButton = document.getElementById('restartButton');
+        const modalTitle = document.getElementById('modalTitle');
+        const mobileControls = document.getElementById('mobileControls');
+        const motionButton = document.getElementById('motionButton');
 
-Bash
+        let isGameRunning = false, score = 0, level = 1, gameSpeed = 0.35;
+        let enemies = [], roadLines = [], player, wheels = [];
+        let motionControlActive = false;
+        
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a1a);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        gameContainer.appendChild(renderer.domElement);
 
-git push origin master
-git push El comando para enviar cambios.
-origin Es el nombre corto que se le dio a tu repositorio remoto de GitHub cuando lo enlazaste por primera vez.
-master Es el nombre de la rama local desde la que estás empujando (y que quieres actualizar en GitHub).
-Resumen del proceso en una línea de tiempo
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        dirLight.position.set(5, 20, 10);
+        scene.add(dirLight);
+        
+        function createPlayerVehicle() {
+            const vehicle = new THREE.Group();
+            const mainColor = 0xfc6a03, darkColor = 0x111111, glassColor = 0x222222;
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: mainColor, roughness: 0.3, metalness: 0.2 });
+            const darkMaterial = new THREE.MeshStandardMaterial({ color: darkColor, roughness: 0.5 });
+            const glassMaterial = new THREE.MeshStandardMaterial({ color: glassColor, roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.4 });
+            const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.6, 4), bodyMaterial);
+            body.position.y = 0.5;
+            vehicle.add(body);
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.7, 1.8), bodyMaterial);
+            cabin.position.set(0, 1.1, -0.3);
+            vehicle.add(cabin);
+            const hood = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.5), bodyMaterial);
+            hood.rotation.x = -Math.PI / 12;
+            hood.position.set(0, 1.05, 1.2);
+            vehicle.add(hood);
+            const roof = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1), bodyMaterial);
+            roof.position.set(0, 1.45, 0);
+            vehicle.add(roof);
+            const windshield = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.8), glassMaterial);
+            windshield.position.set(0, 1.1, 0.6);
+            windshield.rotation.x = -Math.PI / 4;
+            vehicle.add(windshield);
+            const rearWindow = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.6), glassMaterial);
+            rearWindow.position.set(0, 1.1, -1.3);
+            rearWindow.rotation.x = Math.PI / 5;
+            vehicle.add(rearWindow);
+            const spoilerWing = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.15, 0.6), darkMaterial);
+            spoilerWing.position.set(0, 1.4, -2.2);
+            const spoilerPost1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.5, 0.1), darkMaterial);
+            spoilerPost1.position.set(-0.7, 1.0, -2.2);
+            const spoilerPost2 = spoilerPost1.clone();
+            spoilerPost2.position.x = 0.7;
+            vehicle.add(spoilerWing, spoilerPost1, spoilerPost2);
+            const headlight1 = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.15, 0.2, 16), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            headlight1.position.set(-0.7, 0.6, 2.05);
+            headlight1.rotation.x = Math.PI/2;
+            const headlight2 = headlight1.clone();
+            headlight2.position.x = 0.7;
+            vehicle.add(headlight1, headlight2);
+            const taillight1 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.1), new THREE.MeshBasicMaterial({ color: 0xaa0000 }));
+            taillight1.position.set(-0.6, 0.6, -2.05);
+            const taillight2 = taillight1.clone();
+            taillight2.position.x = 0.6;
+            vehicle.add(taillight1, taillight2);
+            wheels = [];
+            const wheelPositions = [ { x: 1.1, z: 1.4 }, { x: -1.1, z: 1.4 }, { x: 1.1, z: -1.4 }, { x: -1.1, z: -1.4 }];
+            wheelPositions.forEach(pos => {
+                const wheelGroup = new THREE.Group();
+                wheelGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.4, 32), darkMaterial));
+                wheelGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.45, 24), new THREE.MeshStandardMaterial({color: 0x888888, metalness: 0.8, roughness: 0.2})));
+                wheelGroup.rotation.z = Math.PI / 2;
+                wheelGroup.position.set(pos.x, 0.45, pos.z);
+                vehicle.add(wheelGroup);
+                wheels.push(wheelGroup);
+            });
+            const mirror1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.3), bodyMaterial);
+            mirror1.position.set(-1.15, 1.0, 0.5);
+            const mirror2 = mirror1.clone();
+            mirror2.position.x = 1.15;
+            vehicle.add(mirror1, mirror2);
+            const exhaust1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.2, 12), new THREE.MeshStandardMaterial({color: 0x555555, metalness: 1.0}));
+            exhaust1.position.set(-0.4, 0.3, -2.05);
+            exhaust1.rotation.x = Math.PI / 2;
+            const exhaust2 = exhaust1.clone();
+            exhaust2.position.x = 0.4;
+            vehicle.add(exhaust1, exhaust2);
+            vehicle.rotation.y = Math.PI;
+            vehicle.position.z = 8;
+            return vehicle;
+        }
+        player = createPlayerVehicle();
+        scene.add(player);
+        camera.position.set(0, 6, 15);
+        camera.lookAt(player.position);
 
-Editas game.js.
-git add . (preparas los cambios).
-git commit -m Mejorar la lógica del movimiento de la serpiente (guardas los cambios).
-git push origin master (envías los cambios a GitHub).
-Cada vez que quieras actualizar tu proyecto en GitHub, repetirás los pasos 2, 3 y 4.
+        const enemyMaterials = [
+            new THREE.MeshStandardMaterial({ color: 0x0055ff, roughness: 0.4, metalness: 0.1 }),
+            new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.4, metalness: 0.1 }),
+            new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.4, metalness: 0.1 }),
+            new THREE.MeshStandardMaterial({ color: 0xff0000, roughness: 0.4, metalness: 0.1 }),
+            new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4, metalness: 0.1 }),
+        ];
+        function createEnemySedan(material) {
+             const car = new THREE.Group();
+            const bodyMaterial = material;
+            const darkMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const body = new THREE.Mesh(new THREE.BoxGeometry(2, 0.7, 4), bodyMaterial);
+            body.position.y = 0.5;
+            car.add(body);
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.7, 2.2), bodyMaterial);
+            cabin.position.y = 1.05;
+            car.add(cabin);
+            const wheels = [{x: 0.9, z: 1.4}, {x: -0.9, z: 1.4}, {x: 0.9, z: -1.4}, {x: -0.9, z: -1.4}];
+            wheels.forEach(pos => {
+                const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16), darkMaterial);
+                wheel.rotation.z = Math.PI / 2;
+                wheel.position.set(pos.x, 0.4, pos.z);
+                car.add(wheel);
+            });
+            car.rotation.y = Math.PI;
+            return car;
+        }
+        function createEnemyTruck(material) {
+            const car = new THREE.Group();
+            const bodyMaterial = material;
+            const darkMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1, 4.5), bodyMaterial);
+            body.position.y = 0.7;
+            car.add(body);
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 2), bodyMaterial);
+            cabin.position.y = 1.7;
+            car.add(cabin);
+            const wheels = [{x: 1, z: 1.5}, {x: -1, z: 1.5}, {x: 1, z: -1.5}, {x: -1, z: -1.5}];
+            wheels.forEach(pos => {
+                const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16), darkMaterial);
+                wheel.rotation.z = Math.PI / 2;
+                wheel.position.set(pos.x, 0.5, pos.z);
+                car.add(wheel);
+            });
+            car.rotation.y = Math.PI;
+            return car;
+        }
+        const enemyCreators = [createEnemySedan, createEnemyTruck];
+
+        const road = new THREE.Mesh(new THREE.PlaneGeometry(24, 200), new THREE.MeshLambertMaterial({ color: 0x4c4c4c }));
+        road.rotation.x = -Math.PI / 2;
+        scene.add(road);
+        
+        const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const laneDividers = [-4, 4];
+        laneDividers.forEach(laneX => {
+            for (let i = 0; i < 20; i++) {
+                const line = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 7), lineMaterial);
+                line.rotation.x = -Math.PI / 2;
+                line.position.set(laneX, 0.01, i * -14);
+                roadLines.push(line);
+                scene.add(line);
+            }
+        });
+
+        function updateRoadLines() { roadLines.forEach(l => { l.position.z += gameSpeed; if(l.position.z > 20) l.position.z -= 280; }); }
+        
+        function spawnEnemy() {
+            const creator = enemyCreators[Math.floor(Math.random() * enemyCreators.length)];
+            const material = enemyMaterials[Math.floor(Math.random() * enemyMaterials.length)];
+            const enemy = creator(material);
+            
+            enemy.position.y = 0;
+            const lanes = [-8, 0, 8];
+            enemy.position.x = lanes[Math.floor(Math.random() * lanes.length)];
+            enemy.position.z = -150;
+
+            let tooClose = false;
+            for(const e of enemies) if(e.position.x === enemy.position.x && Math.abs(e.position.z - enemy.position.z) < 35) tooClose = true;
+            if(!tooClose) { enemies.push(enemy); scene.add(enemy); }
+        }
+        
+        let lastSpawnTime = 0;
+        function updateEnemies(time) {
+             if(isGameRunning && time - lastSpawnTime > 2000 / (level * 0.5 + 1)) { spawnEnemy(); lastSpawnTime = time; }
+        
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                enemy.position.z += gameSpeed;
+                if (enemy.position.z > 20) {
+                    scene.remove(enemy); enemies.splice(i, 1);
+                    score++; scoreEl.textContent = score;
+                    if (score > 0 && Math.floor(score / 30) >= level) { level++; levelEl.textContent = level; gameSpeed += 0.05; }
+                }
+            }
+        }
+        
+        function checkCollisions() {
+            const playerBox = new THREE.Box3().setFromObject(player);
+            for (const enemy of enemies) if(playerBox.intersectsBox(new THREE.Box3().setFromObject(enemy))) { isGameRunning = false; gameOver(); }
+        }
+        
+        let playerTargetX = 0, playerTargetZ = 8;
+        const laneWidth = 8; 
+
+        function handleMove(direction) {
+            if (!isGameRunning) return;
+            if (direction === 'left' && playerTargetX > -laneWidth) playerTargetX -= laneWidth;
+            else if (direction === 'right' && playerTargetX < laneWidth) playerTargetX += laneWidth;
+            else if (direction === 'up' && playerTargetZ > 7) playerTargetZ -= 1;
+            else if (direction === 'down' && playerTargetZ < 9) playerTargetZ += 1;
+        }
+
+        function isMobile() { return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') handleMove('left');
+            else if (e.key === 'ArrowRight') handleMove('right');
+            else if (e.key === 'ArrowUp') handleMove('up');
+            else if (e.key === 'ArrowDown') handleMove('down');
+        });
+
+        if (isMobile()) {
+            mobileControls.style.display = 'flex';
+            document.getElementById('btnLeft').addEventListener('click', () => handleMove('left'));
+            document.getElementById('btnRight').addEventListener('click', () => handleMove('right'));
+            document.getElementById('btnUp').addEventListener('click', () => handleMove('up'));
+            document.getElementById('btnDown').addEventListener('click', () => handleMove('down'));
+        }
+        
+        function handleMotion(event) {
+            if (!motionControlActive) return;
+            const tilt = event.gamma;
+            const newX = player.position.x - tilt * 0.05;
+            player.position.x = THREE.MathUtils.clamp(newX, -laneWidth, laneWidth);
+            playerTargetX = player.position.x;
+        }
+
+        motionButton.addEventListener('click', () => {
+            if (motionControlActive) {
+                window.removeEventListener("deviceorientation", handleMotion);
+                motionControlActive = false;
+                motionButton.textContent = "Activar Control por Movimiento";
+                motionButton.style.backgroundColor = '#f0ad4e';
+                return;
+            }
+
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission().then(permissionState => {
+                    if (permissionState === 'granted') {
+                        window.addEventListener("deviceorientation", handleMotion);
+                        motionControlActive = true;
+                        motionButton.textContent = "Desactivar Movimiento";
+                        motionButton.style.backgroundColor = '#d9534f';
+                    }
+                }).catch(console.error);
+            } else {
+                window.addEventListener("deviceorientation", handleMotion);
+                motionControlActive = true;
+                motionButton.textContent = "Desactivar Movimiento";
+                motionButton.style.backgroundColor = '#d9534f';
+            }
+        });
+        
+        function animate(time) {
+            if (!isGameRunning) return;
+            requestAnimationFrame(animate);
+            if (!motionControlActive) player.position.x += (playerTargetX - player.position.x) * 0.1;
+            player.position.z += (playerTargetZ - player.position.z) * 0.1;
+            wheels.forEach(wheel => { wheel.rotation.y -= gameSpeed * 2; });
+            updateRoadLines();
+            updateEnemies(time);
+            checkCollisions();
+            renderer.render(scene, camera);
+        }
+
+        function init() {
+            score = 0; level = 1; gameSpeed = 0.35;
+            player.position.set(0, 0, 8); playerTargetX = 0; playerTargetZ = 8;
+            scoreEl.textContent = score; levelEl.textContent = level;
+            enemies.forEach(enemy => scene.remove(enemy)); enemies = [];
+            isGameRunning = true; modal.style.display = 'none';
+            animate(0);
+        }
+        
+        function gameOver() {
+            isGameRunning = false;
+            finalScoreEl.textContent = `Puntuación: ${score}`;
+            modalTitle.textContent = '¡JUEGO TERMINADO!';
+            modal.style.display = 'flex';
+        }
+
+        function showStartScreen() {
+            isGameRunning = false;
+            modalTitle.textContent = 'CARRERAS 3D';
+            finalScoreEl.textContent = 'Esquiva los coches y sobrevive';
+            restartButton.textContent = 'EMPEZAR';
+            modal.style.display = 'flex';
+        }
+
+        restartButton.addEventListener('click', init);
+        
+        window.addEventListener('resize', () => {
+            const sceneWidth = 24;
+            const aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = aspect;
+
+            const verticalFovRad = 2 * Math.atan( (sceneWidth / aspect) / (2 * camera.position.z) );
+            camera.fov = THREE.MathUtils.radToDeg(verticalFovRad);
+
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Simula el primer resize para configurar la cámara inicial
+        window.dispatchEvent(new Event('resize'));
+
+        window.onload = showStartScreen;
+        
+    </script>
+</body>
+</html>
