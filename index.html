@@ -160,7 +160,7 @@
         
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x1a1a1a);
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         gameContainer.appendChild(renderer.domElement);
@@ -243,8 +243,9 @@
         }
         player = createPlayerVehicle();
         scene.add(player);
-        camera.position.set(0, 6, 15);
-        camera.lookAt(player.position);
+        
+        camera.position.set(0, 9, 16); 
+        camera.lookAt(0, 2, 0);
 
         const enemyMaterials = [
             new THREE.MeshStandardMaterial({ color: 0x0055ff, roughness: 0.4, metalness: 0.1 }),
@@ -449,19 +450,10 @@
         restartButton.addEventListener('click', init);
         
         window.addEventListener('resize', () => {
-            const sceneWidth = 24;
-            const aspect = window.innerWidth / window.innerHeight;
-            camera.aspect = aspect;
-
-            const verticalFovRad = 2 * Math.atan( (sceneWidth / aspect) / (2 * camera.position.z) );
-            camera.fov = THREE.MathUtils.radToDeg(verticalFovRad);
-
+            camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        // Simula el primer resize para configurar la cámara inicial
-        window.dispatchEvent(new Event('resize'));
 
         window.onload = showStartScreen;
         
